@@ -22,11 +22,11 @@ const createMovie = (req, res, next) => {
 
 const deleteMovie = (req, res, next) => {
   const { movieId } = req.params;
-  Movie.findById(movieId)
+  Movie.find({ movieId })
     .then((movie) => {
-      if (!movie) { next(new NotFoundError404('Фильма не существует')); return; }
-      if (movie.owner.toString() !== req.user._id) { next(new ForbiddeError403('Недостаточно прав')); return; }
-      return Movie.deleteOne(movie).then(res.send({ message: `Фильм ${movieId} удалён` }));
+      if (!movie.length) { next(new NotFoundError404('Фильма не существует')); return; }
+      if (movie[0].owner.toString() !== req.user._id) { next(new ForbiddeError403('Недостаточно прав')); return; }
+      return Movie.deleteOne(movie[0]).then(res.send({ message: `Фильм ${movieId} удалён` }));
     }).catch(next);
 };
 

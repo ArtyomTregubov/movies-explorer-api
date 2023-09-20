@@ -7,6 +7,6 @@ router.get('/', auth, getMovies);
 
 router.post('/', movieValidator, auth, createMovie);
 
-router.delete('/:id', movieIdValidator, auth, deleteMovie);
+router.delete('/:movieId', movieIdValidator, auth, deleteMovie);
 
 module.exports = router;
