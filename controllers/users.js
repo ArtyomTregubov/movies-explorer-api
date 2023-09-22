@@ -4,7 +4,7 @@ const User = require('../models/user');
 const NotFoundError404 = require('../errors/notFoundError404');
 const ConflictError409 = require('../errors/conflictError409');
 const UnauthorizedError401 = require('../errors/unauthorizedError401');
-
+const { USER_EXISTS, AUTHORIZATION_NEEDED, INCORRECT_PATH, USER_LOGGED_OUT } = require('../utils/constants');
 const { NODE_ENV, JWT_SECRET } = process.env;
 const createUser = async (req, res, next) => {
   const {
@@ -18,7 +18,7 @@ const createUser = async (req, res, next) => {
       .catch((err) => {
         if (err.code === 11000) {
           next(new ConflictError409(
-            `Пользователь с email '${email}' уже существует.`,
+            USER_EXISTS.replace("$email", email),
           ));
           return;
         }
@@ -44,19 +44,32 @@ const login = (req, res, next) => {
       );
       res.cookie('token', token, { httpOnly: true, secure: true, maxAge: 604800 }).send({ token });
     })
-    .catch(() => next(new UnauthorizedError401('Необходима авторизация')));
+    .catch(() => next(new UnauthorizedError401(AUTHORIZATION_NEEDED)));
+};
+
+const logout = (req, res, next) => {
+  res.clearCookie('token');
+  return res.status(200).send({message: USER_LOGGED_OUT})
 };
 
 const updateProfileInfo = async (req, res, next) => {
   const { name, email } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, email }, { new: true, runValidators: true })
     .then((user) => res.send(user))
-    .catch(next);
+      .catch((err) => {
+        if (err.code === 11000) {
+          next(new ConflictError409(
+            USER_EXISTS.replace("$email", email),
+          ));
+          return;
+        }
+        next(err);
+      });
 };
 
 
 const unknownLink = () => {
-  throw new NotFoundError404('Некорректный путь');
+  throw new NotFoundError404(INCORRECT_PATH);
 };
 
 module.exports = {
@@ -65,4 +78,5 @@ module.exports = {
   unknownLink,
   getProfile,
   login,
+  logout,
 };

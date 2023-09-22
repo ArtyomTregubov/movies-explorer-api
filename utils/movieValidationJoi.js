@@ -1,8 +1,7 @@
 const { celebrate, Joi } = require('celebrate');
 
 const regExpUrl = require('./regExp');
-//country, director, duration, year, description, image,
-//   //         trailerLink, thumbnail, movieId, nameRU, nameEN, owner
+
 const movieValidator = celebrate({
   body: Joi.object().keys({
     country: Joi.string().required(),
@@ -16,7 +15,6 @@ const movieValidator = celebrate({
     movieId: Joi.number().required(),
     nameRU: Joi.string().required(),
     nameEN: Joi.string().required(),
-    owner: Joi.string().length(24).hex().required(),
   }),
 });
 

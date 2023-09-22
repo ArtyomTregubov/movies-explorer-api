@@ -1,4 +1,5 @@
 require('dotenv').config();
+const { NODE_ENV, DB_PROD, DB_DEV } = process.env;
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -16,7 +17,7 @@ app.use(helmet());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-mongoose.connect('mongodb://admin:admin@127.0.0.1:27017/bitfilmsdb?authSource=admin');
+mongoose.connect(NODE_ENV === 'production' ? DB_PROD : DB_DEV);
 
 app.use(limiter);
 app.use(requestLogger);
